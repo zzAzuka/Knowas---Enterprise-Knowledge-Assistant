@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+boto3
+pinecone
+ollama
+langchain
+pymupdf
+langchain_ollama
+python-jose
+passlib
+python-multipart
