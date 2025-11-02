@@ -29,7 +29,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                bat 'docker push %DOCKER_HUB_REPO%:latest'
+                bat 'docker --quiet push %DOCKER_HUB_REPO%:latest'
             }
         }
     }
