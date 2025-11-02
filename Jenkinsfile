@@ -13,10 +13,9 @@ pipeline {
         }
 
     stage('Build Docker Image') {
-        steps {
-            bat 'docker build -t myimage -f Dockerfile .'
-        }
-    }
+        bat 'docker build -t sibirassal/sibi-knowas:latest -f Dockerfile app'
+}
+
 
         stage('Login to Docker Hub') {
             steps {
