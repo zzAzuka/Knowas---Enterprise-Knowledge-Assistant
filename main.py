@@ -2,9 +2,9 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 
-from api.routes.query import router as queryRouter
-from api.routes.upload import router as uploadRouter
-from core.auth import (
+from app.api.routes.query import router as queryRouter
+from app.api.routes.upload import router as uploadRouter
+from app.core.auth import (
     authenticate_user,
     create_access_token,
     ACCESS_TOKEN_EXPIRE_MINUTES,
