@@ -2,38 +2,50 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = 'sibirassal/sibi-knowas'
+        DOCKER_HUB_REPO = 'sibirassal/sibi-knowas'   // Docker Hub repo name
+        IMAGE_TAG = "latest"                                      // You can change this to a version or build number
     }
 
     stages {
+        // 1️⃣ Step: Pull code from GitHub
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/zzAzuka/Knowas---Enterprise-Knowledge-Assistant.git'
+                git branch: 'main',
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/zzAzuka/Knowas---Enterprise-Knowledge-Assistant.git'
             }
         }
 
+        // 2️⃣ Step: Build the Docker image
         stage('Build Docker Image') {
             steps {
-                // Build from root, since Dockerfile is in repo root
-                bat 'docker build -t %DOCKER_HUB_REPO%:latest -f Dockerfile .'
-            }
-        }
-
-        stage('Login to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_HUB_PASS', usernameVariable: 'DOCKER_HUB_USER')]) {
-                    // Use safer login method via stdin (avoids CLI password warning)
-                    bat '''
-                    echo %DOCKER_HUB_PASS% | docker login -u %DOCKER_HUB_USER% --password-stdin
-                    '''
+                script {
+                    // This runs 'docker build -t yourdockerhubusername/yourimagename:latest .'
+                    dockerImage = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        // 3️⃣ Step: Push image to Docker Hub
+        stage('Push to Docker Hub') {
             steps {
-                bat 'docker push %DOCKER_HUB_REPO%:latest'
+                script {
+                    // This logs in and pushes the image to your Docker Hub repo
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                        dockerImage.push()
+                    }
+                }
             }
+        }
+    }
+
+    // 4️⃣ Cleanup (Windows version uses bat)
+    post {
+        always {
+            echo 'Cleaning up local Docker images...'
+            bat '''
+            docker system prune -af || exit 0
+            '''
         }
     }
 }
