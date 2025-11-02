@@ -14,7 +14,8 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t sibirassal/sibi-knowas:latest -f app/Dockerfile app'
+                // Build from root, since Dockerfile is in repo root
+                bat 'docker build -t sibirassal/sibi-knowas:latest -f Dockerfile .'
             }
         }
 
