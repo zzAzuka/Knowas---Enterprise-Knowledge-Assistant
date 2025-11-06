@@ -7,6 +7,7 @@ pipeline {
         ECR_REPO_NAME = 'knowas/sibi'
         IMAGE_TAG = "latest"
         ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        EC2_HOST = "ec2-13-49-183-249.eu-north-1.compute.amazonaws.com"
     }
 
     stages {
@@ -52,6 +53,20 @@ pipeline {
             steps {
                 script {
                     bat "docker push %ECR_REGISTRY%/%ECR_REPO_NAME%:%IMAGE_TAG%"
+                }
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(['ec2-ssh-key']) {
+                    bat """
+                    ssh -o StrictHostKeyChecking=no ec2-user@%EC2_HOST% ^
+                    "aws ecr get-login-password --region %AWS_REGION% | docker login --username AWS --password-stdin %ECR_REGISTRY% && \
+                    docker pull %ECR_REGISTRY%/%ECR_REPO_NAME%:%IMAGE_TAG% && \
+                    docker stop app || true && docker rm app || true && \
+                    docker run -d -p 80:80 --name app %ECR_REGISTRY%/%ECR_REPO_NAME%:%IMAGE_TAG%"
+                    """
                 }
             }
         }
