@@ -5,9 +5,11 @@ python-dotenv
 boto3
 pinecone
 ollama
-langchain
+langchain>=0.3.16
+langchain-text-splitters
 pymupdf
 langchain_ollama
 python-jose
 passlib
 python-multipart
+mlflow

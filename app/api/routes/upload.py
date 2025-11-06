@@ -1,8 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, Depends
-from core.auth import require_role
-from schemas.uploadSchema import uploadOutput
-from services.dataExtraction import extractedfFromS3
-from services.pdfTextExtraction import pdfTextExtraction
+from app.core.auth import require_role
+from app.schemas.uploadSchema import uploadOutput
+from app.services.dataExtraction import extractedfFromS3
+from app.services.pdfTextExtraction import pdfTextExtraction
 import boto3
 import mlflow
 from datetime import datetime

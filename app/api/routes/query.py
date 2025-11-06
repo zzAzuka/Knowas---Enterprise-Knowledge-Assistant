@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
-from core.auth import require_role
-from core.models import embeddings_ollama, model_ollama
-from core.auth import get_current_user
+from app.core.auth import require_role
+from app.core.models import embeddings_ollama, model_ollama
+from app.core.auth import get_current_user
 from pinecone import Pinecone
-from schemas.querySchema import queryInput, queryOutput
-from core.prompt import chatPrompt
+from app.schemas.querySchema import queryInput, queryOutput
+from app.core.prompt import chatPrompt
 import os
 import mlflow
 from dotenv import load_dotenv
