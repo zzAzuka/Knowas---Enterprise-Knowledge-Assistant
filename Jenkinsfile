@@ -2,12 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = 'sibirassal/sibi-knowas'   // Docker Hub repo name
-        IMAGE_TAG = "latest"                                      // You can change this to a version or build number
+        AWS_REGION = 'eu-north-1'
+        AWS_ACCOUNT_ID = '478261144529'
+        ECR_REPO_NAME = 'knowas/sibi'
+        IMAGE_TAG = "latest"
+        ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
     }
 
     stages {
-        // 1️⃣ Step: Pull code from GitHub
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -16,35 +18,48 @@ pipeline {
             }
         }
 
-        // 2️⃣ Step: Build the Docker image
         stage('Build Docker Image') {
             steps {
                 script {
-                    // This runs 'docker build -t yourdockerhubusername/yourimagename:latest .'
-                    dockerImage = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
+                    dockerImage = docker.build("${ECR_REPO_NAME}:${IMAGE_TAG}")
                 }
             }
         }
 
-        // 3️⃣ Step: Push image to Docker Hub
-        stage('Push to Docker Hub') {
+        stage('Login to ECR') {
             steps {
                 script {
-                    // This logs in and pushes the image to your Docker Hub repo
-                    withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://index.docker.io/v1/']) {
-                    dockerImage.push()
-}
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        sh '''
+                            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Tag Docker Image') {
+            steps {
+                script {
+                    sh "docker tag ${ECR_REPO_NAME}:${IMAGE_TAG} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                script {
+                    sh "docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${IMAGE_TAG}"
                 }
             }
         }
     }
 
-    // 4️⃣ Cleanup (Windows version uses bat)
     post {
         always {
             echo 'Cleaning up local Docker images...'
-            bat '''
-            docker system prune -af || exit 0
+            sh '''
+            docker system prune -af || true
             '''
         }
     }
