@@ -57,15 +57,17 @@ pipeline {
         stage('Fix SSH Key Permissions') {
             steps {
                 script {
-                    // Remove inheritance and set proper permissions for the PEM file
+                    // Take ownership of the file, then set proper permissions
                     bat """
+                    takeown /F "%PEM_PATH%"
+                    icacls "%PEM_PATH%" /reset
                     icacls "%PEM_PATH%" /inheritance:r
                     icacls "%PEM_PATH%" /grant:r "SYSTEM:(R)"
                     """
                 }
             }
         }
-
+        
         stage('Deploy to EC2') {
             steps {
                 script {
