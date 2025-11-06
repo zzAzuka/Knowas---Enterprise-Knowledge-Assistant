@@ -30,9 +30,11 @@ pipeline {
             steps {
                 script {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                        sh '''
-                            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
-                        '''
+                        bat """
+                        for /f "delims=" %%i in ('aws ecr get-login-password --region %AWS_REGION%') do (
+                            echo %%i | docker login --username AWS --password-stdin %ECR_REGISTRY%
+                        )
+                        """
                     }
                 }
             }
@@ -41,7 +43,7 @@ pipeline {
         stage('Tag Docker Image') {
             steps {
                 script {
-                    sh "docker tag ${ECR_REPO_NAME}:${IMAGE_TAG} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${IMAGE_TAG}"
+                    bat "docker tag %ECR_REPO_NAME%:%IMAGE_TAG% %ECR_REGISTRY%/%ECR_REPO_NAME%:%IMAGE_TAG%"
                 }
             }
         }
@@ -49,7 +51,7 @@ pipeline {
         stage('Push to ECR') {
             steps {
                 script {
-                    sh "docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${IMAGE_TAG}"
+                    bat "docker push %ECR_REGISTRY%/%ECR_REPO_NAME%:%IMAGE_TAG%"
                 }
             }
         }
@@ -58,9 +60,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up local Docker images...'
-            sh '''
-            docker system prune -af || true
-            '''
+            bat "docker system prune -af || exit 0"
         }
     }
 }
