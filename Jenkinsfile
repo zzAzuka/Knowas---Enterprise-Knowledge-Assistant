@@ -57,7 +57,6 @@ pipeline {
         stage('Fix SSH Key Permissions') {
             steps {
                 script {
-                    // Take ownership of the file, then set proper permissions
                     bat """
                     takeown /F "%PEM_PATH%"
                     icacls "%PEM_PATH%" /reset
