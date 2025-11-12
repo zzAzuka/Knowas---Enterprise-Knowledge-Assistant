@@ -7,7 +7,7 @@ pipeline {
         ECR_REPO_NAME = 'knowas/sibi'
         IMAGE_TAG = 'latest'
         ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        EC2_HOST = 'ec2-13-49-183-249.eu-north-1.compute.amazonaws.com'
+        EC2_HOST = 'ec2-16-170-169-99.eu-north-1.compute.amazonaws.com'
         PEM_PATH = 'C:\\ProgramData\\Jenkins\\.ssh\\knowas-key.pem'
     }
 
