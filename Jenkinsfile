@@ -70,7 +70,6 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 script {
-                    // Execute remote commands on EC2 - all commands run on Linux EC2 instance
                     bat """
                     ssh -i "%PEM_PATH%" -o StrictHostKeyChecking=no ec2-user@%EC2_HOST% "aws ecr get-login-password --region %AWS_REGION% | docker login --username AWS --password-stdin %ECR_REGISTRY% && docker pull %ECR_REGISTRY%/%ECR_REPO_NAME%:%IMAGE_TAG% && docker stop app 2>/dev/null || true && docker rm app 2>/dev/null || true && docker run -d --env-file /home/ec2-user/knowas-secrets/.env -p 80:80 --name app %ECR_REGISTRY%/%ECR_REPO_NAME%:%IMAGE_TAG%"
                     """
